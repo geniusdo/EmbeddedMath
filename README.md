@@ -1,5 +1,7 @@
 # EmbeddedMath
-<img src="https://github.com/geniusdo/EmbeddedMath/blob/main/doc/ai_generated_logo.png" width="30%" height="auto" alt="LOGO">   
+<p align="center">
+  <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/doc/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
+</p>   
   
 A C++ header only linear algebra math library for embedded device.
 
