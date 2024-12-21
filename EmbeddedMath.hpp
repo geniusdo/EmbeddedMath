@@ -530,7 +530,7 @@ namespace EmbeddedTypes
 
         template <int common>
         friend inline EmbeddedCoreType<ScalarType, rows, cols> operator*(const EmbeddedCoreType<ScalarType, rows, common> &A,
-                                                                     const EmbeddedCoreType<ScalarType, common, cols> &B)
+                                                                         const EmbeddedCoreType<ScalarType, common, cols> &B)
         {
             EmbeddedCoreType<ScalarType, rows, cols> result = EmbeddedCoreType<ScalarType, rows, cols>::Zero();
             for (int i = 0; i < rows; i++)
@@ -587,7 +587,7 @@ namespace EmbeddedTypes
 
         EmbeddedQuaternion() : BaseType() {}
 
-        EmbeddedQuaternion(const ScalarType &x, const ScalarType &y, const ScalarType &z, const ScalarType &w)
+        EmbeddedQuaternion(const ScalarType w, const ScalarType x, const ScalarType y, const ScalarType z)
         {
             this->Elements[0] = x;
             this->Elements[1] = y;
