@@ -1,5 +1,5 @@
 # EmbeddedMath
-<p align="center">
+<p align="left">
   <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/doc/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>   
   
