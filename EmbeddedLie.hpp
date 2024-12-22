@@ -14,9 +14,12 @@ namespace EmbeddedLie
     inline Matrix<Scalar, 3, 3> skew(const Matrix<Scalar, 3, 1> &w)
     {
         Matrix<Scalar, 3, 3> w_x;
-        w_x << 0, -w(2), w(1),
-            w(2), 0, -w(0),
-            -w(1), w(0), 0;
+        w_x(0, 1) = -w(2);
+        w_x(0, 2) = w(1);
+        w_x(1, 0) = w(2);
+        w_x(1, 2) = -w(0);
+        w_x(2, 0) = -w(1);
+        w_x(2, 1) = w(0);
         return w_x;
     }
 
@@ -24,8 +27,7 @@ namespace EmbeddedLie
     template <typename Scalar>
     inline Matrix<Scalar, 3, 1> vee(const Matrix<Scalar, 3, 3> &w_x)
     {
-        Matrix<Scalar, 3, 1> w;
-        w << w_x(2, 1), w_x(0, 2), w_x(1, 0);
+        Matrix<Scalar, 3, 1> w(w_x(2, 1), w_x(0, 2), w_x(1, 0));
         return w;
     }
 
@@ -91,8 +93,7 @@ namespace EmbeddedLie
 
         if (R != Matrix<Scalar, 3, 3>::Identity(3, 3))
         {
-            Matrix<Scalar, 3, 1> vec;
-            vec << w_x(2, 1), w_x(0, 2), w_x(1, 0);
+            Matrix<Scalar, 3, 1> vec(w_x(2, 1), w_x(0, 2), w_x(1, 0));
             return vec;
         }
         else
