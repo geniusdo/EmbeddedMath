@@ -576,11 +576,7 @@ namespace EmbeddedTypes
     class EmbeddedQuaternion : public EmbeddedCoreType<ScalarType, 4, 1>
     {
     protected:
-        union
-        {
-            ScalarType Elements[4];
-            EmbeddedCoreType<ScalarType, 3, 1> xyz;
-        };
+        using EmbeddedCoreType<ScalarType, 4, 1>::Elements;
 
     public:
         using BaseType = EmbeddedCoreType<ScalarType, 4, 1>;
@@ -602,8 +598,49 @@ namespace EmbeddedTypes
             this->Elements[2] = other(2);
             this->Elements[3] = other(3); // w
         }
+
         EmbeddedQuaternion(const EmbeddedQuaternion<ScalarType> &other)
             : BaseType(other) {}
+
+        EmbeddedQuaternion(const EmbeddedCoreType<ScalarType, 3, 3> &rot)
+        {
+            ScalarType trace = rot.trace();
+            if (trace > 0)
+            {
+                ScalarType s = 0.5 / sqrt(trace + 1.0);
+                this->Elements[3] = 0.25 / s;
+                this->Elements[0] = (rot(2, 1) - rot(1, 2)) * s;
+                this->Elements[1] = (rot(0, 2) - rot(2, 0)) / s;
+                this->Elements[2] = (rot(1, 0) - rot(0, 1)) / s;
+            }
+            else
+            {
+                if (rot(0, 0) > rot(1, 1) && rot(0, 0) > rot(2, 2))
+                {
+                    ScalarType s = sqrt(1.0f + rot(0, 0) - rot(1, 1) - rot(2, 2)) * 2;
+                    this->Elements[3] = (rot(2, 1) - rot(1, 2)) / s;
+                    this->Elements[0] = 0.25f * s;
+                    this->Elements[1] = (rot(0, 1) + rot(1, 0)) / s;
+                    this->Elements[2] = (rot(0, 2) + rot(2, 0)) / s;
+                }
+                else if (rot(1, 1) > rot(2, 2))
+                {
+                    ScalarType s = sqrt(1.0f + rot(1, 1) - rot(0, 0) - rot(2, 2)) * 2;
+                    this->Elements[3] = (rot(0, 2) - rot(2, 0)) / s;
+                    this->Elements[0] = (rot(0, 1) + rot(1, 0)) / s;
+                    this->Elements[1] = 0.25f * s;
+                    this->Elements[2] = (rot(1, 2) + rot(2, 1)) / s;
+                }
+                else
+                {
+                    ScalarType s = sqrt(1.0f + rot(2, 2) - rot(0, 0) - rot(1, 1)) * 2;
+                    this->Elements[3] = (rot(1, 0) - rot(0, 1)) / s;
+                    this->Elements[0] = (rot(0, 2) + rot(2, 0)) / s;
+                    this->Elements[1] = (rot(1, 2) + rot(2, 1)) / s;
+                    this->Elements[2] = 0.25f * s;
+                }
+            }
+        }
 
         ~EmbeddedQuaternion() {};
 
@@ -616,9 +653,14 @@ namespace EmbeddedTypes
             return this->Elements[3];
         }
 
-        inline EmbeddedCoreType<ScalarType, 3, 1> vec() const
+        inline EmbeddedCoreType<ScalarType, 3, 1> &vec()
         {
-            return this->xyz;
+            return *reinterpret_cast<EmbeddedCoreType<ScalarType, 3, 1> *>(&this->Elements[0]);
+        }
+
+        const inline EmbeddedCoreType<ScalarType, 3, 1> &vec() const
+        {
+            return *reinterpret_cast<const EmbeddedCoreType<ScalarType, 3, 1> *>(&this->Elements[0]);
         }
 
         inline EmbeddedQuaternion conjugate() const
@@ -642,13 +684,13 @@ namespace EmbeddedTypes
             return result;
         }
 
-        inline EmbeddedQuaternion operator*(const EmbeddedQuaternion &other) const
+        friend inline EmbeddedQuaternion operator*(const EmbeddedQuaternion &left, const EmbeddedQuaternion &right)
         {
             EmbeddedQuaternion result;
-            result.x() = other.w() * this->x() + other.z() * this->y() - other.y() * this->z() + other.x() * this->w();
-            result.y() = -other.z() * this->x() + other.w() * this->y() + other.x() * this->z() + other.y() * this->w();
-            result.z() = other.y() * this->x() - other.x() * this->y() + other.w() * this->z() + other.z() * this->w();
-            result.w() = -other.x() * this->x() - other.y() * this->y() - other.z() * this->z() + other.w() * this->w();
+            result.w() = left.w() * right.w() - left.x() * right.x() - left.y() * right.y() - left.z() * right.z();
+            result.x() = left.w() * right.x() + left.x() * right.w() + left.y() * right.z() - left.z() * right.y();
+            result.y() = left.w() * right.y() - left.x() * right.z() + left.y() * right.w() + left.z() * right.x();
+            result.z() = left.w() * right.z() + left.x() * right.y() - left.y() * right.x() + left.z() * right.w();
             return result;
         }
 
@@ -696,6 +738,9 @@ namespace EmbeddedMath
 {
     using namespace EmbeddedTypes;
 
+    template <typename T, int rows, int cols>
+    using Matrix = EmbeddedCoreType<T, rows, cols>;
+
     using Vector2f = EmbeddedCoreType<float, 2, 1>;
     using Vector3f = EmbeddedCoreType<float, 3, 1>;
     using Vector4f = EmbeddedCoreType<float, 4, 1>;
@@ -705,6 +750,16 @@ namespace EmbeddedMath
     using Matrix2f = EmbeddedCoreType<float, 2, 2>;
     using Matrix3f = EmbeddedCoreType<float, 3, 3>;
     using Matrix4f = EmbeddedCoreType<float, 4, 4>;
+
+    using Vector2d = EmbeddedCoreType<double, 2, 1>;
+    using Vector3d = EmbeddedCoreType<double, 3, 1>;
+    using Vector4d = EmbeddedCoreType<double, 4, 1>;
+
+    using Quaterniond = EmbeddedQuaternion<double>;
+
+    using Matrix2d = EmbeddedCoreType<double, 2, 2>;
+    using Matrix3d = EmbeddedCoreType<double, 3, 3>;
+    using Matrix4d = EmbeddedCoreType<double, 4, 4>;
 
 }
 #endif // EMBEDDEDMATH_HPP
