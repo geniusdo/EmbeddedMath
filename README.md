@@ -2,20 +2,23 @@
 <p align="left">
   <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/doc/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>   
-  
+
 A C++ header only linear algebra math library for embedded device.
+
+
 
 ## Purpose:
 
 Bringing a smooth **linear algebra** development experience, with an **Eigen-like interface**, even on **embedded devices**!
 
 ## Features:
-- **Eigen-like API**: Use the same API as Eigen, but with only static memory allocation.
-- **Small footprint**: Only a few kilobytes of code, with no dependencies on external libraries.
-- **Fast performance**: Optimized for speed and efficiency, with template metaprogramming.
-- **Cross-platform compatibility**: Works on any platform that supports C++17 or later.
-- **Easy to use**: Simply include the header file in your project and start using the API.
-- **Test coverage**: The library is thoroughly tested and has a high test coverage rate.
+- **<span style="color:orange">Eigen-like API</span>**: Use the same API as Eigen, but with only static memory allocation.
+- **<span style="color:lightblue">Small footprint</span>**: Only a few kilobytes of code, with no dependencies on external libraries.
+- **<span style="color:red">Fast performance</span>**: Optimized for speed and efficiency, with template metaprogramming.
+- **<span style="color:cyan">Cross-platform compatibility</span>**: Works on any platform that supports C++17 or later.
+- **<span style="color:pink">Easy to use</span>**: Simply include the header file in your project and start using the API.
+- **<span style="color:green">Test coverage</span>**: The library is thoroughly tested and has a high test coverage rate.
+
 
 
 ## Usage:
