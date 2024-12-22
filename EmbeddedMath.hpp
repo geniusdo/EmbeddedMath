@@ -715,6 +715,33 @@ namespace EmbeddedTypes
             return result;
         }
 
+        inline EmbeddedCoreType<ScalarType, 3, 1> toEulerAngles() const
+        {
+            const ScalarType singularityThreshold = 0.5f - FLOAT_EPSILON;
+            EmbeddedCoreType<ScalarType, 3, 1> result;
+            ScalarType singularity = this->w() * this->y() - this->z() * this->x();
+
+            if (singularity < -singularityThreshold)
+            {
+                result.z() = 2.0f * atan2(this->x(), this->w());
+                result.y() = -M_PI * 0.5f;
+                result.x() = 0;
+            }
+            else if (singularity > singularityThreshold)
+            {
+                result.z() = -2.0f * atan2(this->x(), this->w());
+                result.y() = M_PI * 0.5f;
+                result.x() = 0;
+            }
+            else
+            {
+                result.x() = atan2(2.0f * (this->w() * this->x() + this->y() * this->z()), 1.0f - 2.0f * (this->x() * this->x() + this->y() * this->y()));
+                result.y() = asin(2.0f * singularity);
+                result.z() = atan2(2.0f * (this->w() * this->z() + this->x() * this->y()), 1.0f - 2.0f * (this->y() * this->y() + this->z() * this->z()));
+            }
+            return result;
+        }
+
         inline void setIdentity()
         {
             this->w() = (ScalarType)1;
