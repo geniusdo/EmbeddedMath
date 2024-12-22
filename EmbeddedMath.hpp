@@ -768,6 +768,9 @@ namespace EmbeddedMath
     template <typename T, int rows, int cols>
     using Matrix = EmbeddedCoreType<T, rows, cols>;
 
+    template <typename T>
+    using Quaternion = EmbeddedQuaternion<T>;
+
     using Vector2f = EmbeddedCoreType<float, 2, 1>;
     using Vector3f = EmbeddedCoreType<float, 3, 1>;
     using Vector4f = EmbeddedCoreType<float, 4, 1>;
