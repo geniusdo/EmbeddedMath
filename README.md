@@ -7,7 +7,16 @@ A C++ header only linear algebra math library for embedded device.
 
 ## Purpose:
 
-Bringing a smooth **linear algebra** development experience, with an **Eigen-like interface**, even on **embedded devices**!  
+Bringing a smooth **linear algebra** development experience, with an **Eigen-like interface**, even on **embedded devices**!
+
+## Features:
+- **Eigen-like API**: Use the same API as Eigen, but with only static memory allocation.
+- **Small footprint**: Only a few kilobytes of code, with no dependencies on external libraries.
+- **Fast performance**: Optimized for speed and efficiency, with template metaprogramming.
+- **Cross-platform compatibility**: Works on any platform that supports C++17 or later.
+- **Easy to use**: Simply include the header file in your project and start using the API.
+- **Test coverage**: The library is thoroughly tested and has a high test coverage rate.
+
 
 ## Usage:
 By simply aliasing `Eigen` to `EmbeddedMath`, you can use the same API as Eigen on microcontrollers with C++ support enabled.
@@ -37,3 +46,9 @@ Simply drag and drop the `EmbeddedMath.hpp` file into your project, and you're a
 ## Dependencies:
 - C++17 or later (test with`arm-none-eabi-g++ 10.3.1`)
 - Posix math library (e.g., `math.h`)
+
+
+## License:
+The code is under Apache License 2.0.
+
+#### Any issues or suggestions, please open an issue or PR.
