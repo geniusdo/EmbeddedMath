@@ -177,7 +177,186 @@ TEST_CASE("test Vector")
     CHECK(v17.cross(v18).isApprox(Vector3f(-3.0f, 6.0f, -3.0f), threshold)); // Cross product should match these values
 }
 
-TEST_CASE("test Matrix")
+TEST_CASE("test Matrix3f")
 {
-    
+    using namespace EmbeddedMath;
+
+    float threshold = 0.0001f;
+
+    // Create and initialize Matrix3f mat1 (invertible matrix)
+    Matrix3f mat1;
+    mat1(0, 0) = 1.0f;
+    mat1(0, 1) = 2.0f;
+    mat1(0, 2) = 3.0f;
+    mat1(1, 0) = 0.0f;
+    mat1(1, 1) = 4.0f;
+    mat1(1, 2) = 5.0f;
+    mat1(2, 0) = 0.0f;
+    mat1(2, 1) = 0.0f;
+    mat1(2, 2) = 6.0f;
+
+    // Create and initialize Matrix3f mat2
+    Matrix3f mat2;
+    mat2(0, 0) = 9.0f;
+    mat2(0, 1) = 8.0f;
+    mat2(0, 2) = 7.0f;
+    mat2(1, 0) = 6.0f;
+    mat2(1, 1) = 5.0f;
+    mat2(1, 2) = 4.0f;
+    mat2(2, 0) = 3.0f;
+    mat2(2, 1) = 2.0f;
+    mat2(2, 2) = 1.0f;
+
+    // Create and initialize Matrix3f mat3 (identity matrix)
+    Matrix3f mat3;
+    mat3(0, 0) = 1.0f;
+    mat3(0, 1) = 0.0f;
+    mat3(0, 2) = 0.0f;
+    mat3(1, 0) = 0.0f;
+    mat3(1, 1) = 1.0f;
+    mat3(1, 2) = 0.0f;
+    mat3(2, 0) = 0.0f;
+    mat3(2, 1) = 0.0f;
+    mat3(2, 2) = 1.0f; // Identity matrix
+
+    // ------------------------------ Matrix Multiplication ------------------------------
+    {
+        Matrix3f result = mat1 * mat2;
+
+        // Check the multiplication result
+        CHECK(result(0, 0) == 30.0f);
+        CHECK(result(0, 1) == 24.0f);
+        CHECK(result(0, 2) == 18.0f);
+
+        CHECK(result(1, 0) == 39.0f);
+        CHECK(result(1, 1) == 30.0f);
+        CHECK(result(1, 2) == 21.0f);
+
+        CHECK(result(2, 0) == 18.0f);
+        CHECK(result(2, 1) == 12.0f);
+        CHECK(result(2, 2) == 6.0f);
+    }
+
+
+    // ------------------------------ Consecutive Matrix Multiplication ------------------------------
+    {
+        // (mat1 * mat2) * mat3
+        Matrix3f result1 = mat1 * mat2;
+        Matrix3f result2 = result1 * mat3;
+        CHECK(result2.isApprox(mat1 * mat2 * mat3, threshold));
+    }
+
+    {
+        // mat1 * (mat2 * mat3)
+        Matrix3f result1 = mat2 * mat3;
+        Matrix3f result2 = mat1 * result1;
+        CHECK(result2.isApprox(mat1 * mat2 * mat3, threshold));
+    }
+
+    // ------------------------------ Inverse of the Matrix ------------------------------
+    {
+        Matrix3f inverseMat = mat1.inverse();
+
+        Matrix3f identity = mat1 * inverseMat;
+
+        // Check the identity matrix after multiplication with inverse
+        CHECK(isApprox(identity(0, 0), 1.0f));
+        CHECK(isApprox(identity(1, 1), 1.0f));
+        CHECK(isApprox(identity(2, 2), 1.0f));
+        CHECK(isApprox(identity(0, 1), 0.0f));
+        CHECK(isApprox(identity(0, 2), 0.0f));
+        CHECK(isApprox(identity(1, 0), 0.0f));
+        CHECK(isApprox(identity(1, 2), 0.0f));
+        CHECK(isApprox(identity(2, 0), 0.0f));
+        CHECK(isApprox(identity(2, 1), 0.0f));
+    }
+
+    // ------------------------------ Matrix Transpose ------------------------------
+    {
+        Matrix3f transposeMat = mat1.transpose();
+        CHECK(transposeMat(0, 1) == mat1(1, 0));
+        CHECK(transposeMat(0, 2) == mat1(2, 0));
+        CHECK(transposeMat(1, 0) == mat1(0, 1));
+        CHECK(transposeMat(1, 2) == mat1(2, 1));
+        CHECK(transposeMat(2, 0) == mat1(0, 2));
+        CHECK(transposeMat(2, 1) == mat1(1, 2));
+    }
+
+    // ------------------------------ Matrix Evaluation ------------------------------
+    {
+        Matrix3f evalMat = mat1.eval();
+        CHECK(evalMat == mat1); // Ensure the evaluation returns the correct matrix
+    }
+}
+
+TEST_CASE("Matrix4f")
+{
+    using namespace EmbeddedMath;
+
+    float threshold = 0.0001f;
+
+    // Create and initialize Matrix4f mat1 (invertible matrix)
+    Matrix4f mat1;
+    mat1(0, 0) = 4.0f;
+    mat1(0, 1) = 3.0f;
+    mat1(0, 2) = 2.0f;
+    mat1(0, 3) = 1.0f;
+    mat1(1, 0) = 3.0f;
+    mat1(1, 1) = 2.0f;
+    mat1(1, 2) = 1.0f;
+    mat1(1, 3) = 0.0f;
+    mat1(2, 0) = 2.0f;
+    mat1(2, 1) = 1.0f;
+    mat1(2, 2) = 4.0f;
+    mat1(2, 3) = 3.0f;
+    mat1(3, 0) = 1.0f;
+    mat1(3, 1) = 0.0f;
+    mat1(3, 2) = 3.0f;
+    mat1(3, 3) = 4.0f;
+
+    // Create and initialize Matrix4f mat2
+    Matrix4f mat2;
+    mat2(0, 0) = 1.0f;
+    mat2(0, 1) = 2.0f;
+    mat2(0, 2) = 3.0f;
+    mat2(0, 3) = 4.0f;
+    mat2(1, 0) = 5.0f;
+    mat2(1, 1) = 6.0f;
+    mat2(1, 2) = 7.0f;
+    mat2(1, 3) = 8.0f;
+    mat2(2, 0) = 9.0f;
+    mat2(2, 1) = 10.0f;
+    mat2(2, 2) = 11.0f;
+    mat2(2, 3) = 12.0f;
+    mat2(3, 0) = 13.0f;
+    mat2(3, 1) = 14.0f;
+    mat2(3, 2) = 15.0f;
+    mat2(3, 3) = 16.0f;
+
+    // ------------------------------ Matrix Multiplication ------------------------------
+    {
+        Matrix4f result = mat1 * mat2;
+        
+        CHECK(result(0, 0) == 50.0f);
+        CHECK(result(0, 1) == 60.0f);
+        CHECK(result(0, 2) == 70.0f);
+        CHECK(result(0, 3) == 80.0f);
+
+        CHECK(result(1, 0) == 22.0f);
+        CHECK(result(1, 1) == 28.0f);
+        CHECK(result(1, 2) == 34.0f);
+        CHECK(result(1, 3) == 40.0f);
+
+        CHECK(result(2, 0) == 82.0f);
+        CHECK(result(2, 1) == 92.0f);
+        CHECK(result(2, 2) == 102.0f);
+        CHECK(result(2, 3) == 112.0f);
+
+        CHECK(result(3, 0) == 80.0f);
+        CHECK(result(3, 1) == 88.0f);
+        CHECK(result(3, 2) == 96.0f);
+        CHECK(result(3, 3) == 104.0f);
+    }
+
+    // Add other tests like Inverse, Transpose, etc.
 }
