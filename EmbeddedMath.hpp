@@ -640,6 +640,7 @@ namespace EmbeddedTypes
                     this->Elements[2] = 0.25f * s;
                 }
             }
+            this->normalize();
         }
 
         ~EmbeddedQuaternion() {};
