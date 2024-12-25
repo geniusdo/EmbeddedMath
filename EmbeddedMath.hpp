@@ -528,23 +528,10 @@ namespace EmbeddedTypes
             return result;
         }
 
-        template <int common>
-        friend inline EmbeddedCoreType<ScalarType, rows, cols> operator*(const EmbeddedCoreType<ScalarType, rows, common> &A,
-                                                                         const EmbeddedCoreType<ScalarType, common, cols> &B)
-        {
-            EmbeddedCoreType<ScalarType, rows, cols> result = EmbeddedCoreType<ScalarType, rows, cols>::Zero();
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    for (int k = 0; k < common; k++)
-                    {
-                        result(i, j) += A(i, k) * B(k, j);
-                    }
-                }
-            }
-            return result;
-        }
+        template <typename T, int R1, int C1_R2, int C2>
+        friend EmbeddedCoreType<T, R1, C2> operator*(
+            const EmbeddedCoreType<T, R1, C1_R2> &lhs,
+            const EmbeddedCoreType<T, C1_R2, C2> &rhs);
 
         inline EmbeddedCoreType<ScalarType, MaxDimAtCompileTime, MaxDimAtCompileTime> asDiagonal() const
         {
@@ -571,6 +558,24 @@ namespace EmbeddedTypes
         }
     };
 
+    template <typename T, int R1, int C1_R2, int C2>
+    EmbeddedCoreType<T, R1, C2> operator*(
+        const EmbeddedCoreType<T, R1, C1_R2> &lhs,
+        const EmbeddedCoreType<T, C1_R2, C2> &rhs)
+    {
+        EmbeddedCoreType<T, R1, C2> result = EmbeddedCoreType<T, R1, C2>::Zero();
+        for (int i = 0; i < R1; ++i)
+        {
+            for (int j = 0; j < C2; ++j)
+            {
+                for (int k = 0; k < C1_R2; ++k)
+                {
+                    result(i, j) += lhs(i, k) * rhs(k, j);
+                }
+            }
+        }
+        return result;
+    }
     // Partial Specialize Quaternion
     template <typename ScalarType>
     class EmbeddedQuaternion : public EmbeddedCoreType<ScalarType, 4, 1>
