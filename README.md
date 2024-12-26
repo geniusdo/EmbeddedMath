@@ -46,6 +46,9 @@ int main() {
 
 Simply drag and drop the `EmbeddedMath.hpp` file into your project, and you're all set to get started!
 
+## Example: 
+A typical example of this library is to implement a kalman filter, which can be found at [Embedded-ESKF](https://github.com/geniusdo/Embedded-ESKF).
+
 ## Dependencies:
 - C++17 or later (test with`arm-none-eabi-g++ 10.3.1`)
 - Posix math library (e.g., `math.h`)
@@ -55,3 +58,4 @@ Simply drag and drop the `EmbeddedMath.hpp` file into your project, and you're a
 The code is under Apache License 2.0.
 
 #### Any issues or suggestions, please open an issue or PR.
+*Give me a star if you like it!* 
