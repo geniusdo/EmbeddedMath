@@ -260,7 +260,7 @@ namespace EmbeddedTypes
             {
                 for (int j = 0; j < cols; j++)
                 {
-                    result(j, i) = Elements[i * cols + j];
+                    result(j, i) = Elements[j * cols + i];
                 }
             }
             return result;
@@ -382,6 +382,9 @@ namespace EmbeddedTypes
             EmbeddedCoreType result;
             if constexpr (RowsAtCompileTime == 2 && ColsAtCompileTime == 2)
             {
+                // a b
+                // c d
+                // det = a * d - b * c
                 ScalarType det = this->Elements[0] * this->Elements[3] - this->Elements[1] * this->Elements[2];
                 if (abs(det) < FLOAT_EPSILON)
                 {
@@ -390,136 +393,44 @@ namespace EmbeddedTypes
                 ScalarType invDet = (ScalarType)1 / det;
 
                 result(0, 0) = this->Elements[3] * invDet;
-                result(0, 1) = -this->Elements[1] * invDet;
-                result(1, 0) = -this->Elements[2] * invDet;
+                result(0, 1) = -this->Elements[2] * invDet;
+                result(1, 0) = -this->Elements[1] * invDet;
                 result(1, 1) = this->Elements[0] * invDet;
             }
             else if constexpr (RowsAtCompileTime == 3 && ColsAtCompileTime == 3)
             {
-
-                ScalarType det =
-                    this->Elements[0] * (this->Elements[4] * this->Elements[8] - this->Elements[5] * this->Elements[7]) - this->Elements[1] * (this->Elements[3] * this->Elements[8] - this->Elements[5] * this->Elements[6]) + this->Elements[2] * (this->Elements[3] * this->Elements[7] - this->Elements[4] * this->Elements[6]);
+                // a b c
+                // d e f
+                // g h i
+                // det = a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g
+                ScalarType det = this->Elements[0] * this->Elements[4] * this->Elements[8] -
+                                 this->Elements[0] * this->Elements[7] * this->Elements[5] -
+                                 this->Elements[3] * this->Elements[1] * this->Elements[8] +
+                                 this->Elements[3] * this->Elements[7] * this->Elements[2] +
+                                 this->Elements[6] * this->Elements[1] * this->Elements[5] -
+                                 this->Elements[6] * this->Elements[4] * this->Elements[2];
 
                 if (det == 0)
                 {
                     return EmbeddedCoreType::Zero();
                 }
-                ScalarType invDet = (ScalarType)1 / det;
+                ScalarType invDet = (ScalarType)1.0 / det;
 
                 result(0, 0) = (this->Elements[4] * this->Elements[8] - this->Elements[5] * this->Elements[7]) * invDet;
-                result(0, 1) = (this->Elements[2] * this->Elements[7] - this->Elements[1] * this->Elements[8]) * invDet;
-                result(0, 2) = (this->Elements[1] * this->Elements[5] - this->Elements[2] * this->Elements[4]) * invDet;
+                result(0, 1) = (this->Elements[6] * this->Elements[5] - this->Elements[3] * this->Elements[8]) * invDet;
+                result(0, 2) = (this->Elements[3] * this->Elements[7] - this->Elements[6] * this->Elements[4]) * invDet;
 
-                result(1, 0) = (this->Elements[5] * this->Elements[6] - this->Elements[3] * this->Elements[8]) * invDet;
+                result(1, 0) = (this->Elements[2] * this->Elements[7] - this->Elements[1] * this->Elements[8]) * invDet;
                 result(1, 1) = (this->Elements[0] * this->Elements[8] - this->Elements[2] * this->Elements[6]) * invDet;
-                result(1, 2) = (this->Elements[2] * this->Elements[3] - this->Elements[0] * this->Elements[5]) * invDet;
+                result(1, 2) = (this->Elements[1] * this->Elements[6] - this->Elements[0] * this->Elements[7]) * invDet;
 
-                result(2, 0) = (this->Elements[3] * this->Elements[7] - this->Elements[4] * this->Elements[6]) * invDet;
-                result(2, 1) = (this->Elements[1] * this->Elements[6] - this->Elements[0] * this->Elements[7]) * invDet;
+                result(2, 0) = (this->Elements[1] * this->Elements[5] - this->Elements[2] * this->Elements[4]) * invDet;
+                result(2, 1) = (this->Elements[2] * this->Elements[3] - this->Elements[0] * this->Elements[5]) * invDet;
                 result(2, 2) = (this->Elements[0] * this->Elements[4] - this->Elements[1] * this->Elements[3]) * invDet;
             }
             else if constexpr (RowsAtCompileTime == 4 && ColsAtCompileTime == 4)
             {
-                ScalarType det =
-                    this->Elements[0] * (this->Elements[5] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                         this->Elements[6] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) +
-                                         this->Elements[7] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13])) -
-                    this->Elements[1] * (this->Elements[4] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                         this->Elements[6] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                         this->Elements[7] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12])) +
-                    this->Elements[2] * (this->Elements[4] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) -
-                                         this->Elements[5] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                         this->Elements[7] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12])) -
-                    this->Elements[3] * (this->Elements[4] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13]) -
-                                         this->Elements[5] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12]) +
-                                         this->Elements[6] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12]));
-
-                if (abs(det) < FLOAT_EPSILON)
-                {
-                    return EmbeddedCoreType::Zero();
-                }
-
-                ScalarType invDet = (ScalarType)1 / det;
-
-                result(0, 0) = (this->Elements[5] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                this->Elements[6] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) +
-                                this->Elements[7] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13])) *
-                               invDet;
-
-                result(0, 1) = -(this->Elements[1] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                 this->Elements[2] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) +
-                                 this->Elements[3] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13])) *
-                               invDet;
-
-                result(0, 2) = (this->Elements[1] * (this->Elements[6] * this->Elements[15] - this->Elements[7] * this->Elements[14]) -
-                                this->Elements[2] * (this->Elements[5] * this->Elements[15] - this->Elements[7] * this->Elements[13]) +
-                                this->Elements[3] * (this->Elements[5] * this->Elements[14] - this->Elements[6] * this->Elements[13])) *
-                               invDet;
-
-                result(0, 3) = -(this->Elements[1] * (this->Elements[6] * this->Elements[11] - this->Elements[7] * this->Elements[10]) -
-                                 this->Elements[2] * (this->Elements[5] * this->Elements[11] - this->Elements[7] * this->Elements[9]) +
-                                 this->Elements[3] * (this->Elements[5] * this->Elements[10] - this->Elements[6] * this->Elements[9])) *
-                               invDet;
-
-                result(1, 0) = -(this->Elements[4] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                 this->Elements[6] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                 this->Elements[7] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12])) *
-                               invDet;
-
-                result(1, 1) = (this->Elements[0] * (this->Elements[10] * this->Elements[15] - this->Elements[11] * this->Elements[14]) -
-                                this->Elements[2] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                this->Elements[3] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12])) *
-                               invDet;
-
-                result(1, 2) = -(this->Elements[0] * (this->Elements[6] * this->Elements[15] - this->Elements[7] * this->Elements[14]) -
-                                 this->Elements[2] * (this->Elements[4] * this->Elements[15] - this->Elements[7] * this->Elements[12]) +
-                                 this->Elements[3] * (this->Elements[4] * this->Elements[14] - this->Elements[6] * this->Elements[12])) *
-                               invDet;
-
-                result(1, 3) = (this->Elements[0] * (this->Elements[6] * this->Elements[11] - this->Elements[7] * this->Elements[10]) -
-                                this->Elements[2] * (this->Elements[4] * this->Elements[11] - this->Elements[7] * this->Elements[9]) +
-                                this->Elements[3] * (this->Elements[4] * this->Elements[10] - this->Elements[6] * this->Elements[9])) *
-                               invDet;
-
-                result(2, 0) = (this->Elements[4] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) -
-                                this->Elements[5] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                this->Elements[7] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12])) *
-                               invDet;
-
-                result(2, 1) = -(this->Elements[0] * (this->Elements[9] * this->Elements[15] - this->Elements[11] * this->Elements[13]) -
-                                 this->Elements[5] * (this->Elements[8] * this->Elements[15] - this->Elements[11] * this->Elements[12]) +
-                                 this->Elements[7] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12])) *
-                               invDet;
-
-                result(2, 2) = (this->Elements[0] * (this->Elements[6] * this->Elements[15] - this->Elements[7] * this->Elements[14]) -
-                                this->Elements[4] * (this->Elements[5] * this->Elements[15] - this->Elements[7] * this->Elements[13]) +
-                                this->Elements[7] * (this->Elements[5] * this->Elements[14] - this->Elements[6] * this->Elements[13])) *
-                               invDet;
-
-                result(2, 3) = -(this->Elements[0] * (this->Elements[6] * this->Elements[11] - this->Elements[7] * this->Elements[10]) -
-                                 this->Elements[4] * (this->Elements[5] * this->Elements[11] - this->Elements[7] * this->Elements[9]) +
-                                 this->Elements[7] * (this->Elements[5] * this->Elements[10] - this->Elements[6] * this->Elements[9])) *
-                               invDet;
-
-                result(3, 0) = -(this->Elements[4] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13]) -
-                                 this->Elements[5] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12]) +
-                                 this->Elements[6] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12])) *
-                               invDet;
-
-                result(3, 1) = (this->Elements[0] * (this->Elements[9] * this->Elements[14] - this->Elements[10] * this->Elements[13]) -
-                                this->Elements[5] * (this->Elements[8] * this->Elements[14] - this->Elements[10] * this->Elements[12]) +
-                                this->Elements[6] * (this->Elements[8] * this->Elements[13] - this->Elements[9] * this->Elements[12])) *
-                               invDet;
-
-                result(3, 2) = -(this->Elements[0] * (this->Elements[6] * this->Elements[14] - this->Elements[7] * this->Elements[13]) -
-                                 this->Elements[4] * (this->Elements[5] * this->Elements[14] - this->Elements[7] * this->Elements[12]) +
-                                 this->Elements[6] * (this->Elements[5] * this->Elements[13] - this->Elements[6] * this->Elements[12])) *
-                               invDet;
-
-                result(3, 3) = (this->Elements[0] * (this->Elements[6] * this->Elements[10] - this->Elements[7] * this->Elements[9]) -
-                                this->Elements[4] * (this->Elements[5] * this->Elements[10] - this->Elements[7] * this->Elements[8]) +
-                                this->Elements[5] * (this->Elements[5] * this->Elements[9] - this->Elements[6] * this->Elements[8])) *
-                               invDet;
+                // TODO : implement
             }
             else
             {
@@ -563,7 +474,7 @@ namespace EmbeddedTypes
         const EmbeddedCoreType<T, R1, C1_R2> &lhs,
         const EmbeddedCoreType<T, C1_R2, C2> &rhs)
     {
-        EmbeddedCoreType<T, R1, C2> result = EmbeddedCoreType<T, R1, C2>::Zero();
+        EmbeddedCoreType<T, R1, C2> result;
         for (int i = 0; i < R1; ++i)
         {
             for (int j = 0; j < C2; ++j)
