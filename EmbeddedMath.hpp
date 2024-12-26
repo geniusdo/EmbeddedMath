@@ -112,12 +112,12 @@ namespace EmbeddedTypes
 
         inline ScalarType &operator()(int row, int col)
         {
-            return Elements[row * cols + col];
+            return Elements[col * rows + row];
         }
 
         inline const ScalarType &operator()(int row, int col) const
         {
-            return Elements[row * cols + col];
+            return Elements[col * rows + row];
         }
 
         inline ScalarType *data()
