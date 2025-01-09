@@ -377,6 +377,30 @@ namespace EmbeddedTypes
             return result;
         }
 
+        static inline EmbeddedCoreType UnitX()
+        {
+            static_assert(RowsAtCompileTime >= 3 && ColsAtCompileTime == 1, "UnitX() only works for vectors longer than 3x1");
+            EmbeddedCoreType result;
+            result.x() = static_cast<ScalarType>(1.0);
+            return result;
+        }
+
+        static inline EmbeddedCoreType UnitY()
+        {
+            static_assert(RowsAtCompileTime >= 3 && ColsAtCompileTime == 1, "UnitY() only works for vectors longer than 3x1");
+            EmbeddedCoreType result;
+            result.y() = static_cast<ScalarType>(1.0);
+            return result;
+        }
+
+        static inline EmbeddedCoreType UnitZ()
+        {
+            static_assert(RowsAtCompileTime >= 3 && ColsAtCompileTime == 1, "UnitZ() only works for vectors longer than 3x1");
+            EmbeddedCoreType result;
+            result.z() = static_cast<ScalarType>(1.0);
+            return result;
+        }
+
         inline EmbeddedCoreType inverse() const
         {
             EmbeddedCoreType result;
@@ -676,6 +700,14 @@ namespace EmbeddedTypes
         }
     };
 
+    template <typename ScalarType>
+    static inline EmbeddedQuaternion<ScalarType> AngleAxis(const ScalarType &angle, const EmbeddedCoreType<ScalarType, 3, 1> &axis)
+    {
+        EmbeddedQuaternion<ScalarType> result;
+        result.w() = cos(angle * 0.5);
+        result.vec() = sin(angle * 0.5) * axis;
+        return result;
+    }
 }
 
 namespace EmbeddedMath
@@ -707,6 +739,9 @@ namespace EmbeddedMath
     using Matrix2d = EmbeddedCoreType<double, 2, 2>;
     using Matrix3d = EmbeddedCoreType<double, 3, 3>;
     using Matrix4d = EmbeddedCoreType<double, 4, 4>;
+
+    constexpr auto AngleAxisf = AngleAxis<float>;
+    constexpr auto AngleAxisd = AngleAxis<double>;
 
 }
 #endif // EMBEDDEDMATH_HPP

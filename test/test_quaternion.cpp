@@ -2,7 +2,7 @@
 #include "doctest.h"
 
 #include <EmbeddedMath.hpp>
-
+#include "iostream"
 template <typename T>
 bool isApprox(T a, T b, T epsilon = 0.0001)
 {
@@ -116,10 +116,20 @@ TEST_CASE("Quaternion")
     CHECK(mat2(0, 0) == 1.0f); // x
     CHECK(mat2(1, 1) == 1.0f); // y
     CHECK(mat2(2, 2) == 1.0f); // z
-    
+
     Quaternionf q12(mat2);
     CHECK(q12(0) == 0.0f); // x
     CHECK(q12(1) == 0.0f); // y
     CHECK(q12(2) == 0.0f); // z
     CHECK(q12(3) == 1.0f); // w
+
+
+    Quaternionf q13 = AngleAxisf(0, Vector3f::UnitX()) * AngleAxisf(0.5f * M_PI, Vector3f::UnitY()) * AngleAxisf(0, Vector3f::UnitZ());
+    CHECK(isApprox(q13.x(), 0.0f)); // x  
+    CHECK(isApprox(q13.y(), 0.7071068f)); // y  
+    CHECK(isApprox(q13.z(), 0.0f)); // z  
+    CHECK(isApprox(q13.w(), 0.7071068f)); // w
+
+    Quaternionf q14 = AngleAxisf(0, Vector3f::UnitX()) * AngleAxisf(0.0f, Vector3f::UnitY()) * AngleAxisf(0, Vector3f::UnitZ());
+    CHECK(q14== Quaternionf::Identity()); 
 }
