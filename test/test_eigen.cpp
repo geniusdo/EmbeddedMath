@@ -101,13 +101,13 @@ TEST_CASE("Test with Eigen")
     EmbeddedMath::Matrix<double, 3, 4> embedded_m4 = embedded_m1 * embedded_m1 * embedded_m2;
     CHECK(isApprox(eigen_m4, embedded_m4));
 
-    //Test quaternion
+    // Test quaternion
     Eigen::Quaterniond eigen_q1(0.707f, 0.0f, 0.707f, 0.0f);
     EmbeddedMath::Quaterniond embedded_q1(0.707f, 0.0f, 0.707f, 0.0f);
 
     CHECK(isApprox(Eigen::Matrix3d(eigen_q1.toRotationMatrix()), embedded_q1.toRotationMatrix()));
 
-    //Test quaternion multiplication
+    // Test quaternion multiplication
     Eigen::Quaterniond eigen_q2(0.707f, 0.0f, -0.707f, 0.0f);
     EmbeddedMath::Quaterniond embedded_q2(0.707f, 0.0f, -0.707f, 0.0f);
 
@@ -115,4 +115,8 @@ TEST_CASE("Test with Eigen")
     EmbeddedMath::Quaterniond embedded_q3 = embedded_q1 * embedded_q2;
 
     CHECK(isApprox(eigen_q3.toRotationMatrix(), embedded_q3.toRotationMatrix()));
+
+    auto eigen_euler = eigen_q3.toRotationMatrix().eulerAngles(2, 1, 0);
+    auto embedded_euler = embedded_q3.toRotationMatrix().eulerAngles(2, 1, 0);
+    CHECK(isApprox(eigen_euler, embedded_euler));
 }

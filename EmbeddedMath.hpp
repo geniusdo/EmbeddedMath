@@ -463,6 +463,18 @@ namespace EmbeddedTypes
             return result;
         }
 
+        inline EmbeddedCoreType<ScalarType, 3, 1> eulerAngles(const int y = 2, const int p = 1, const int r = 0) const
+        {
+            //TODO: fix the first element to -PI/2 to PI/2
+            static_assert(RowsAtCompileTime == 3 && ColsAtCompileTime == 3);
+            EmbeddedCoreType<ScalarType, 3, 1> result;
+
+            result(y) = atan2(this->Elements[5], this->Elements[8]);
+            result(p) = atan2(-this->Elements[2], sqrt(this->Elements[5] * this->Elements[5] + this->Elements[8] * this->Elements[8]));
+            result(r) = atan2(this->Elements[1], this->Elements[0]);
+            return result;
+        }
+
         template <typename T, int R1, int C1_R2, int C2>
         friend EmbeddedCoreType<T, R1, C2> operator*(
             const EmbeddedCoreType<T, R1, C1_R2> &lhs,
