@@ -405,6 +405,38 @@ namespace EmbeddedTypes
             return result;
         }
 
+        inline ScalarType determinant() const
+        {
+            ScalarType result = 0;
+            if constexpr (RowsAtCompileTime == 1 && ColsAtCompileTime == 1)
+            {
+                result = this->Elements[0];
+            }
+            else if constexpr (RowsAtCompileTime == 2 && ColsAtCompileTime == 2)
+            {
+                result = this->Elements[0] * this->Elements[3] - this->Elements[1] * this->Elements[2];
+            }
+            else if constexpr (RowsAtCompileTime == 3 && ColsAtCompileTime == 3)
+            {
+                result = this->Elements[0] * this->Elements[4] * this->Elements[8] -
+                         this->Elements[0] * this->Elements[7] * this->Elements[5] -
+                         this->Elements[3] * this->Elements[1] * this->Elements[8] +
+                         this->Elements[3] * this->Elements[7] * this->Elements[2] +
+                         this->Elements[6] * this->Elements[1] * this->Elements[5] -
+                         this->Elements[6] * this->Elements[4] * this->Elements[2];
+            }
+            else if constexpr (RowsAtCompileTime == 4 && ColsAtCompileTime == 4)
+            {
+                // TODO: Implement
+
+            }
+            else
+            {
+                result = 0;
+            }
+            return result;
+        }
+
         inline ScalarType dot(const EmbeddedCoreType &other) const
         {
             ScalarType result = 0;
@@ -487,18 +519,12 @@ namespace EmbeddedTypes
         inline EmbeddedCoreType inverse() const
         {
             EmbeddedCoreType result;
+            ScalarType det = this->determinant();
+            if (abs(det) < FLOAT_EPSILON)
+                return EmbeddedCoreType::Zero();
+            ScalarType invDet = (ScalarType)1.0 / det;
             if constexpr (RowsAtCompileTime == 2 && ColsAtCompileTime == 2)
             {
-                // a b
-                // c d
-                // det = a * d - b * c
-                ScalarType det = this->Elements[0] * this->Elements[3] - this->Elements[1] * this->Elements[2];
-                if (abs(det) < FLOAT_EPSILON)
-                {
-                    return EmbeddedCoreType::Zero();
-                }
-                ScalarType invDet = (ScalarType)1 / det;
-
                 result(0, 0) = this->Elements[3] * invDet;
                 result(0, 1) = -this->Elements[2] * invDet;
                 result(1, 0) = -this->Elements[1] * invDet;
@@ -506,23 +532,6 @@ namespace EmbeddedTypes
             }
             else if constexpr (RowsAtCompileTime == 3 && ColsAtCompileTime == 3)
             {
-                // a b c
-                // d e f
-                // g h i
-                // det = a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g
-                ScalarType det = this->Elements[0] * this->Elements[4] * this->Elements[8] -
-                                 this->Elements[0] * this->Elements[7] * this->Elements[5] -
-                                 this->Elements[3] * this->Elements[1] * this->Elements[8] +
-                                 this->Elements[3] * this->Elements[7] * this->Elements[2] +
-                                 this->Elements[6] * this->Elements[1] * this->Elements[5] -
-                                 this->Elements[6] * this->Elements[4] * this->Elements[2];
-
-                if (det == 0)
-                {
-                    return EmbeddedCoreType::Zero();
-                }
-                ScalarType invDet = (ScalarType)1.0 / det;
-
                 result(0, 0) = (this->Elements[4] * this->Elements[8] - this->Elements[5] * this->Elements[7]) * invDet;
                 result(0, 1) = (this->Elements[6] * this->Elements[5] - this->Elements[3] * this->Elements[8]) * invDet;
                 result(0, 2) = (this->Elements[3] * this->Elements[7] - this->Elements[6] * this->Elements[4]) * invDet;
