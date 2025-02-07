@@ -1,6 +1,6 @@
 # EmbeddedMath
 <p align="left">
-  <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/doc/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
+  <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/docs/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>   
 
 A C++ header only linear algebra math library for embedded device.
