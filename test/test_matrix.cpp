@@ -287,6 +287,26 @@ TEST_CASE("test Matrix3f")
         Matrix3f evalMat = mat1.eval();
         CHECK(evalMat == mat1); // Ensure the evaluation returns the correct matrix
     }
+
+    // block function test
+    {
+        Matrix3f idMat = Matrix3f::Identity();
+        auto refMat = idMat.block<2,2>(0,0);
+
+        CHECK(refMat(0) == 1.0f);
+        CHECK(refMat(1) == 0.0f);
+        CHECK(refMat(2) == 0.0f);
+        CHECK(refMat(3) == 1.0f);
+
+        refMat(1) = 3.0f;
+        CHECK(refMat(1) == 3.0f);
+        CHECK(idMat(1) == 3.0f);
+
+        idMat.block<2,2>(1,1) = Matrix2f::Zero();
+        CHECK(idMat(2,2) == 0.0f);
+
+        Matrix2f subMat = idMat.block<2,2>(0,0);
+    }
 }
 
 TEST_CASE("Matrix4f")

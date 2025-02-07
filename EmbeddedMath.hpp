@@ -10,6 +10,72 @@
 namespace EmbeddedTypes
 {
     template <typename ScalarType, int rows, int cols>
+    class EmbeddedCoreType;
+
+    template <typename ScalarType, int rows, int cols>
+    class EmbeddedRefType;
+
+    template <typename ScalarType>
+    class EmbeddedQuaternion;
+
+    template <typename ScalarType, int rows, int cols>
+    class EmbeddedRefType
+    {
+    protected:
+        ScalarType (&RefElements)[rows * cols];
+        static constexpr int size = rows * cols;
+        const int subRows, subCols, subSize, startRow, startCol;
+
+    public:
+        using Scalar = ScalarType;
+
+        EmbeddedRefType() = delete;
+
+        EmbeddedRefType(ScalarType (&Elements)[rows * cols],
+                        const int sub_rows, const int sub_cols,
+                        const int start_row, const int start_col) : RefElements(Elements),
+                                                                    subRows(sub_rows),
+                                                                    subCols(sub_cols),
+                                                                    subSize(sub_rows * sub_cols),
+                                                                    startRow(start_row),
+                                                                    startCol(start_col) {}
+
+        inline ScalarType &operator()(int index)
+        {
+            int refIndex = ((int)(index / subRows) + startCol) * rows + (index % subRows) + startRow;
+            return RefElements[refIndex];
+        }
+
+        inline const ScalarType &operator()(int index) const
+        {
+            int refIndex = ((int)(index / subRows) + startCol) * rows + (index % subRows) + startRow;
+            return RefElements[refIndex];
+        }
+
+        inline ScalarType &operator()(int row, int col)
+        {
+            int refIndex = (col + startCol) * rows + row + startRow;
+            return RefElements[refIndex];
+        }
+
+        inline const ScalarType &operator()(int row, int col) const
+        {
+            int refIndex = (col + startCol) * rows + row + startRow;
+            return RefElements[refIndex];
+        }
+
+        template <int SubRows, int SubCols>
+        inline void operator=(const EmbeddedCoreType<Scalar, SubRows, SubCols> &other)
+        {
+            for (int i = 0; i < subSize; ++i)
+            {
+                this->operator()(i) = other(i);
+            }
+            return;
+        }
+    };
+
+    template <typename ScalarType, int rows, int cols>
     class EmbeddedCoreType
     {
     protected:
@@ -31,6 +97,15 @@ namespace EmbeddedTypes
         EmbeddedCoreType(const EmbeddedCoreType &other)
         {
             memcpy(this->Elements, other.data(), sizeof(ScalarType) * size);
+        }
+
+        template <int RefRows, int RefCols>
+        EmbeddedCoreType(const EmbeddedRefType<ScalarType, RefRows, RefCols> &other)
+        {
+            for (int i = 0; i < size; ++i)
+            {
+                this->operator()(i) = other(i);
+            }
         }
 
         EmbeddedCoreType(const ScalarType value)
@@ -401,6 +476,14 @@ namespace EmbeddedTypes
             return result;
         }
 
+        template <int subrows, int subcols>
+        inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> block(int startrows, int startcols)
+        {
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                subrows, subcols, startrows, startcols);
+        }
+
         inline EmbeddedCoreType inverse() const
         {
             EmbeddedCoreType result;
@@ -465,7 +548,7 @@ namespace EmbeddedTypes
 
         inline EmbeddedCoreType<ScalarType, 3, 1> eulerAngles(const int y = 2, const int p = 1, const int r = 0) const
         {
-            //TODO: fix the first element to -PI/2 to PI/2
+            // TODO: fix the first element to -PI/2 to PI/2
             static_assert(RowsAtCompileTime == 3 && ColsAtCompileTime == 3);
             EmbeddedCoreType<ScalarType, 3, 1> result;
 
