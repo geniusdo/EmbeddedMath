@@ -1,7 +1,7 @@
 # EmbeddedMath
 <p align="left">
-  <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/docs/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
-</p>   
+  <img src="ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
+</p>    
 
 一个专为嵌入式设备设计的轻量级线性代数库.  
 

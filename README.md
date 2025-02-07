@@ -1,6 +1,6 @@
 # EmbeddedMath
 <p align="left">
-  <img src="https://github.com/geniusdo/EmbeddedMath/blob/main/docs/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
+  <img src="docs/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>   
 
 [English](README.md) | [简体中文](docs/README.zh_CN.md)
