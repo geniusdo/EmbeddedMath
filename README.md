@@ -40,6 +40,10 @@ int main() {
     Eigen::Vector3f v(1.0f, 0.0f, 0.0f);
     Eigen::Vector3f rotated_v = rotation_matrix * v;
 
+    // Create a transformation matrix
+    Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
+    transformation_matrix.block<3, 3>(0, 0) = rotation_matrix;
+
     return 0;
 }
 ```
