@@ -3,6 +3,9 @@
   <img src="ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>    
 
+[English](../README.md) | [简体中文](README.zh_CN.md)  
+[Implementation Details](impl_details//CoreType.md)
+
 一个专为嵌入式设备设计的轻量级线性代数库.  
 
 ## 目标:

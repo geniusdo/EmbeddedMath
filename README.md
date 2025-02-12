@@ -3,7 +3,8 @@
   <img src="docs/ai_generated_logo.png" width="20%" height="auto" alt="LOGO">
 </p>   
 
-[English](README.md) | [简体中文](docs/README.zh_CN.md)
+[English](README.md) | [简体中文](docs/README.zh_CN.md)  
+[Implementation Details](docs/impl_details//CoreType.md)
 
 A C++ header only linear algebra math library for embedded device.
 
