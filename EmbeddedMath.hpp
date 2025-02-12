@@ -18,6 +18,9 @@ namespace EmbeddedTypes
     template <typename ScalarType>
     class EmbeddedQuaternion;
 
+    template <class MatrixType>
+    class PartialPivLU;
+
     template <typename ScalarType, int rows, int cols>
     class EmbeddedRefType
     {
@@ -428,7 +431,6 @@ namespace EmbeddedTypes
             else if constexpr (RowsAtCompileTime == 4 && ColsAtCompileTime == 4)
             {
                 // TODO: Implement
-
             }
             else
             {
@@ -803,6 +805,20 @@ namespace EmbeddedTypes
             return result;
         }
     };
+
+    template <class MatrixType>
+    class PartialPivLU
+    {
+    protected:
+        using ScalarType = typename MatrixType::Scalar;
+        MatrixType L, U, P; // L is lower triangular, U is upper triangular, P is permutation matrix
+    public:
+        PartialPivLU(const MatrixType &matrix)
+        {
+            //! currently only support square matrix
+            static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
+        }
+    }
 
     template <typename ScalarType>
     static inline EmbeddedQuaternion<ScalarType> AngleAxis(const ScalarType &angle, const EmbeddedCoreType<ScalarType, 3, 1> &axis)
