@@ -546,6 +546,27 @@ namespace EmbeddedTypes
                 subrows, subcols, startrows, startcols);
         }
 
+        inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> block(int startrows, int startcols, int subrows, int subcols)
+        {
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                subrows, subcols, startrows, startcols);
+        }
+
+        inline EmbeddedRefType<Scalar, 1, ColsAtCompileTime> row(const int index)
+        {
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                1, ColsAtCompileTime, index, 0);
+        }
+
+        inline EmbeddedRefType<Scalar, RowsAtCompileTime, 1> col(const int index)
+        {
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                RowsAtCompileTime, 1, 0, index);
+        }
+
         inline EmbeddedCoreType inverse() const
         {
             EmbeddedCoreType result;

@@ -312,7 +312,11 @@ TEST_CASE("test Matrix3f")
 
         idMat.block<2,2>(0,0).swap(zeroMat.block<2,2>(0,0));
         CHECK(zeroMat(0,0) == 1.0f);
-        CHECK(idMat(0,1) == 0.0f);
+        CHECK(idMat(0,0) == 0.0f);
+
+        idMat.block<3,1>(0,0).swap(zeroMat.block<3,1>(0,0));
+        CHECK(zeroMat(0,0) == 0.0f);
+        CHECK(idMat(0,0) == 1.0f);
 
     }
 }
