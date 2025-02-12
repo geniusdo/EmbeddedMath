@@ -860,12 +860,53 @@ namespace EmbeddedTypes
     {
     protected:
         using ScalarType = typename MatrixType::Scalar;
+        using MatrixType::RowsAtCompileTime;
+        using MatrixType::ColsAtCompileTime;
         MatrixType L, U, P; // L is lower triangular, U is upper triangular, P is permutation matrix
+        ScalarType Q[ColsAtCompileTime];
+
     public:
         PartialPivLU(const MatrixType &matrix)
         {
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
+            this->P = matrix;
+            // initialize Q
+            for (int i = 0; i < RowsAtCompileTime; ++i)
+            {
+                Q[i] = i;
+            }
+        }
+
+    private:
+        void decompose(const MatrixType &matrix)
+        {
+            for (int k = 0; k < ColsAtCompileTime; ++k)
+            {
+                // find pivoting column index
+                int pivotIndex = k;
+                for (int j = k + 1; j < ColsAtCompileTime; ++j)
+                {
+                    if (fabs(matrix(k, j)) > fabs(matrix(k, pivotIndex)))
+                    {
+                        pivotIndex = j;
+                    }
+                }
+
+                if (pivotIndex != k)
+                {
+                    matrix.col(k).swap(matrix.col(pivotIndex));
+                }
+
+                for (int i = k + 1; i < ColsAtCompileTime; ++i)
+                {
+                    matrix(k, i) /= matrix(k, k);
+                    for (int j = k + 1; j < RowsAtCompileTime; ++j)
+                    {
+                        matrix(i, j) -= matrix(k, i) * matrix(j, k) / matrix(k, k);
+                    }
+                }
+            }
         }
     };
 
