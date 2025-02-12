@@ -306,6 +306,14 @@ TEST_CASE("test Matrix3f")
         CHECK(idMat(2,2) == 0.0f);
 
         Matrix2f subMat = idMat.block<2,2>(0,0);
+
+        idMat = Matrix3f::Identity();
+        Matrix3f zeroMat = Matrix3f::Zero();
+
+        idMat.block<2,2>(0,0).swap(zeroMat.block<2,2>(0,0));
+        CHECK(zeroMat(0,0) == 1.0f);
+        CHECK(idMat(0,1) == 0.0f);
+
     }
 }
 

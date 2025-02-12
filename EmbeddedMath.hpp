@@ -28,6 +28,7 @@ namespace EmbeddedTypes
         ScalarType (&RefElements)[rows * cols];
         static constexpr int size = rows * cols;
         const int subRows, subCols, subSize, startRow, startCol;
+        bool isColumnMajorOrder;
 
     public:
         using Scalar = ScalarType;
@@ -41,7 +42,13 @@ namespace EmbeddedTypes
                                                                     subCols(sub_cols),
                                                                     subSize(sub_rows * sub_cols),
                                                                     startRow(start_row),
-                                                                    startCol(start_col) {}
+                                                                    startCol(start_col)
+        {
+            if ((sub_rows == rows) || (sub_cols == 1))
+                isColumnMajorOrder = true;
+            else
+                isColumnMajorOrder = false;
+        }
 
         inline ScalarType &operator()(int index)
         {
@@ -73,6 +80,27 @@ namespace EmbeddedTypes
             for (int i = 0; i < subSize; ++i)
             {
                 this->operator()(i) = other(i);
+            }
+            return;
+        }
+
+        inline void swap(EmbeddedRefType other)
+        {
+            if (this->isColumnMajorOrder = true && other.isColumnMajorOrder == true)
+            {
+                ScalarType tmp[subRows * subCols];
+                memcpy(tmp, &(this->operator()(0)), sizeof(ScalarType) * subRows * subCols);
+                memcpy(&(this->operator()(0)), &(other(0)), sizeof(ScalarType) * subRows * subCols);
+                memcpy(&(other(0)), tmp, sizeof(ScalarType) * subRows * subCols);
+            }
+            else
+            {
+                for (int i = 0; i < subSize; ++i)
+                {
+                    ScalarType tmp = this->operator()(i);
+                    this->operator()(i) = other(i);
+                    other(i) = tmp;
+                }
             }
             return;
         }
@@ -818,7 +846,7 @@ namespace EmbeddedTypes
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
         }
-    }
+    };
 
     template <typename ScalarType>
     static inline EmbeddedQuaternion<ScalarType> AngleAxis(const ScalarType &angle, const EmbeddedCoreType<ScalarType, 3, 1> &axis)
