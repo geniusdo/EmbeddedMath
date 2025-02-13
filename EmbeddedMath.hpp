@@ -860,8 +860,8 @@ namespace EmbeddedTypes
     {
     protected:
         using ScalarType = typename MatrixType::Scalar;
-        using MatrixType::RowsAtCompileTime;
         using MatrixType::ColsAtCompileTime;
+        using MatrixType::RowsAtCompileTime;
         MatrixType L, U, P; // L is lower triangular, U is upper triangular, P is permutation matrix
         ScalarType Q[ColsAtCompileTime];
 
@@ -870,7 +870,9 @@ namespace EmbeddedTypes
         {
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
-            this->P = matrix;
+            this->L = MatrixType::Identity();
+            this->U = MatrixType::Identity();
+            this->P = MatrixType::Identity();
             // initialize Q
             for (int i = 0; i < RowsAtCompileTime; ++i)
             {
@@ -896,15 +898,28 @@ namespace EmbeddedTypes
                 if (pivotIndex != k)
                 {
                     matrix.col(k).swap(matrix.col(pivotIndex));
-                }
 
+                    ScalarType tmp = Q[k];
+                    Q[k] = Q[pivotIndex];
+                    Q[pivotIndex] = tmp;
+                }
+                this->L.block<ColsAtCompileTime - k, 1>(k, k) = matrix.block<ColsAtCompileTime - k, 1>(k, k);
+                ScalarType invPivot = 1.0 / matrix(k, k);
                 for (int i = k + 1; i < ColsAtCompileTime; ++i)
                 {
-                    matrix(k, i) /= matrix(k, k);
+                    matrix(k, i) *= invPivot;
                     for (int j = k + 1; j < RowsAtCompileTime; ++j)
                     {
-                        matrix(i, j) -= matrix(k, i) * matrix(j, k) / matrix(k, k);
+                        matrix(i, j) -= matrix(k, i) * matrix(j, k) * invPivot;
                     }
+                }
+            }
+
+            for (int k = 0; k < RowsAtCompileTime; ++k)
+            {
+                for (int i = k + 1; i < ColsAtCompileTime; ++i)
+                {
+                    this->U(k, i) = matrix(k, i);
                 }
             }
         }
