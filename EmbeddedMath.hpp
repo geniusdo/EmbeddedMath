@@ -84,6 +84,15 @@ namespace EmbeddedTypes
             return;
         }
 
+        inline void operator=(const EmbeddedRefType<Scalar, rows, cols> &other)
+        {
+            for (int i = 0; i < subSize; ++i)
+            {
+                this->operator()(i) = other(i);
+            }
+            return;
+        }
+
         inline void swap(EmbeddedRefType other)
         {
             if (this->isColumnMajorOrder = true && other.isColumnMajorOrder == true)
@@ -542,28 +551,28 @@ namespace EmbeddedTypes
         inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> block(int startrows, int startcols)
         {
             return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
-                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                *reinterpret_cast<Scalar(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
                 subrows, subcols, startrows, startcols);
         }
 
         inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> block(int startrows, int startcols, int subrows, int subcols)
         {
             return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
-                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+                *reinterpret_cast<Scalar(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
                 subrows, subcols, startrows, startcols);
         }
 
         inline EmbeddedRefType<Scalar, 1, ColsAtCompileTime> row(const int index)
         {
-            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
-                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+            return EmbeddedRefType<Scalar, 1, ColsAtCompileTime>(
+                *reinterpret_cast<Scalar(*)[ColsAtCompileTime]>(this->data()),
                 1, ColsAtCompileTime, index, 0);
         }
 
         inline EmbeddedRefType<Scalar, RowsAtCompileTime, 1> col(const int index)
         {
-            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
-                *reinterpret_cast<float(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, 1>(
+                *reinterpret_cast<Scalar(*)[RowsAtCompileTime]>(this->data()),
                 RowsAtCompileTime, 1, 0, index);
         }
 
@@ -860,10 +869,8 @@ namespace EmbeddedTypes
     {
     protected:
         using ScalarType = typename MatrixType::Scalar;
-        using MatrixType::ColsAtCompileTime;
-        using MatrixType::RowsAtCompileTime;
         MatrixType L, U, P; // L is lower triangular, U is upper triangular, P is permutation matrix
-        ScalarType Q[ColsAtCompileTime];
+        ScalarType Q[MatrixType::ColsAtCompileTime];
 
     public:
         PartialPivLU(const MatrixType &matrix)
@@ -871,23 +878,34 @@ namespace EmbeddedTypes
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
             this->L = MatrixType::Identity();
-            this->U = MatrixType::Identity();
             this->P = MatrixType::Identity();
+            this->U = matrix;
             // initialize Q
-            for (int i = 0; i < RowsAtCompileTime; ++i)
+            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
             {
                 Q[i] = i;
             }
+            decompose(this->U);
+        }
+
+        MatrixType matrixL()
+        {
+            return this->L;
+        }
+
+        MatrixType matrixU()
+        {
+            return this->U;
         }
 
     private:
-        void decompose(const MatrixType &matrix)
+        void decompose(MatrixType &matrix)
         {
-            for (int k = 0; k < ColsAtCompileTime; ++k)
+            for (int k = 0; k < MatrixType::ColsAtCompileTime; ++k)
             {
                 // find pivoting column index
                 int pivotIndex = k;
-                for (int j = k + 1; j < ColsAtCompileTime; ++j)
+                for (int j = k + 1; j < MatrixType::ColsAtCompileTime; ++j)
                 {
                     if (fabs(matrix(k, j)) > fabs(matrix(k, pivotIndex)))
                     {
@@ -903,25 +921,30 @@ namespace EmbeddedTypes
                     Q[k] = Q[pivotIndex];
                     Q[pivotIndex] = tmp;
                 }
-                this->L.block<ColsAtCompileTime - k, 1>(k, k) = matrix.block<ColsAtCompileTime - k, 1>(k, k);
+    
+                this->L.block(k, k, MatrixType::ColsAtCompileTime - k, 1) = matrix.block(k, k, MatrixType::ColsAtCompileTime - k, 1);
                 ScalarType invPivot = 1.0 / matrix(k, k);
-                for (int i = k + 1; i < ColsAtCompileTime; ++i)
+                for (int i = k + 1; i < MatrixType::ColsAtCompileTime; ++i)
                 {
-                    matrix(k, i) *= invPivot;
-                    for (int j = k + 1; j < RowsAtCompileTime; ++j)
+                    for (int j = k + 1; j < MatrixType::RowsAtCompileTime; ++j)
                     {
-                        matrix(i, j) -= matrix(k, i) * matrix(j, k) * invPivot;
+                        matrix(j, i) -= matrix(k, i) * matrix(j, k) * invPivot;
                     }
+                    matrix(k, i) *= invPivot;
                 }
             }
-
-            for (int k = 0; k < RowsAtCompileTime; ++k)
+            
+            for (int k = 0; k < MatrixType::ColsAtCompileTime; ++k)
             {
-                for (int i = k + 1; i < ColsAtCompileTime; ++i)
+                for (int i = k ; i < MatrixType::RowsAtCompileTime; ++i)
                 {
-                    this->U(k, i) = matrix(k, i);
+                    if(i==k)
+                        matrix(i, k) = 1;
+                    else
+                        matrix(i, k) = 0;
                 }
             }
+            return;
         }
     };
 
