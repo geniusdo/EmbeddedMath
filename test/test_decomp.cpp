@@ -55,4 +55,10 @@ TEST_CASE("test decomposition")
     printf("%f %f %f\n", result(1,0), result(1,1), result(1,2));
     printf("%f %f %f\n", result(2,0), result(2,1), result(2,2));
 
+    auto inv = lu3.inverse();
+    printf("inv\n");
+    printf("%f %f %f\n", inv(0,0), inv(0,1), inv(0,2));
+    printf("%f %f %f\n", inv(1,0), inv(1,1), inv(1,2));
+    printf("%f %f %f\n", inv(2,0), inv(2,1), inv(2,2));
+
 }

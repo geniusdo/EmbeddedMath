@@ -563,17 +563,17 @@ namespace EmbeddedTypes
                 subrows, subcols, startrows, startcols);
         }
 
-        inline EmbeddedRefType<Scalar, 1, ColsAtCompileTime> row(const int index)
+        inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> row(const int index)
         {
-            return EmbeddedRefType<Scalar, 1, ColsAtCompileTime>(
-                *reinterpret_cast<Scalar(*)[ColsAtCompileTime]>(this->data()),
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<Scalar(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
                 1, ColsAtCompileTime, index, 0);
         }
 
-        inline EmbeddedRefType<Scalar, RowsAtCompileTime, 1> col(const int index)
+        inline EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime> col(const int index)
         {
-            return EmbeddedRefType<Scalar, RowsAtCompileTime, 1>(
-                *reinterpret_cast<Scalar(*)[RowsAtCompileTime]>(this->data()),
+            return EmbeddedRefType<Scalar, RowsAtCompileTime, ColsAtCompileTime>(
+                *reinterpret_cast<Scalar(*)[RowsAtCompileTime * ColsAtCompileTime]>(this->data()),
                 RowsAtCompileTime, 1, 0, index);
         }
 
@@ -910,36 +910,38 @@ namespace EmbeddedTypes
 
         MatrixType inverse()
         {
-            MatrixType invL = MatrixType::Identity();
-            MatrixType invU;
+            MatrixType invL;
+            MatrixType invU = MatrixType::Identity();
             MatrixType result;
 
+            invL(0) = 1.0 / this->L(0);
             for (int i = 1; i < MatrixType::RowsAtCompileTime; ++i)
             {
+                invL(i, i) = 1.0 / this->L(i, i);
                 for (int j = 0; j < i; ++j)
                 {
-                    for (int k = j + 1; k < i - 1; ++k)
-                        invL(i, j) -= this->L(i, k) * invL(k, j);
-                    invL(i, j) -= this->L(i, j);
+                    for (int k = j; k < i; ++k)
+                        invL(i, j) -= this->L(i, k) * invL(k, j) * invL(i, i);
                 }
             }
 
-            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            for (int i = MatrixType::RowsAtCompileTime - 1; i >= 0; --i)
             {
-                invU(i, i) = 1.0 / this->U(i, i);
                 for (int j = i + 1; j < MatrixType::ColsAtCompileTime; ++j)
                 {
                     for (int k = i + 1; k < j; ++k)
-                        invU(i, j) -= this->U(i, k) * invU(k, j) * invU(i, i);
+                        invU(i, j) -= this->U(i, k) * invU(k, j);
+                    invU(i, j) -= this->U(i, j);
                 }
             }
 
             result = invU * invL;
 
             // swap rows according to P
-            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            for (int i = MatrixType::RowsAtCompileTime - 1; i >= 0; --i)
             {
-                result.row(i).swap(result.row(Q[i]));
+                if (Q[i] != i)
+                    result.row(i).swap(result.row(Q[i]));
             }
             return result;
         }
@@ -962,10 +964,7 @@ namespace EmbeddedTypes
                 if (pivotIndex != k)
                 {
                     matrix.col(k).swap(matrix.col(pivotIndex));
-
-                    ScalarType tmp = Q[k];
                     Q[k] = Q[pivotIndex];
-                    Q[pivotIndex] = tmp;
                 }
 
                 this->L.block(k, k, MatrixType::ColsAtCompileTime - k, 1) = matrix.block(k, k, MatrixType::ColsAtCompileTime - k, 1);
