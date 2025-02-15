@@ -136,6 +136,7 @@ namespace EmbeddedTypes
 
         EmbeddedCoreType(const EmbeddedCoreType &other)
         {
+            static_assert((this->RowsAtCompileTime == other.RowsAtCompileTime) && (this->ColsAtCompileTime == other.ColsAtCompileTime));
             memcpy(this->Elements, other.data(), sizeof(ScalarType) * size);
         }
 
