@@ -466,13 +466,10 @@ namespace EmbeddedTypes
                          this->Elements[6] * this->Elements[1] * this->Elements[5] -
                          this->Elements[6] * this->Elements[4] * this->Elements[2];
             }
-            else if constexpr (RowsAtCompileTime == 4 && ColsAtCompileTime == 4)
-            {
-                // TODO: Implement
-            }
             else
             {
-                result = 0;
+                PartialPivLU<EmbeddedCoreType> lu(*this);
+                result = lu.determinant();
             }
             return result;
         }
@@ -580,12 +577,13 @@ namespace EmbeddedTypes
         inline EmbeddedCoreType inverse() const
         {
             EmbeddedCoreType result;
-            ScalarType det = this->determinant();
-            if (abs(det) < FLOAT_EPSILON)
-                return EmbeddedCoreType::Zero();
-            ScalarType invDet = (ScalarType)1.0 / det;
+
             if constexpr (RowsAtCompileTime == 2 && ColsAtCompileTime == 2)
             {
+                ScalarType det = this->determinant();
+                if (abs(det) < FLOAT_EPSILON)
+                    return EmbeddedCoreType::Zero();
+                ScalarType invDet = (ScalarType)1.0 / det;
                 result(0, 0) = this->Elements[3] * invDet;
                 result(0, 1) = -this->Elements[2] * invDet;
                 result(1, 0) = -this->Elements[1] * invDet;
@@ -593,6 +591,10 @@ namespace EmbeddedTypes
             }
             else if constexpr (RowsAtCompileTime == 3 && ColsAtCompileTime == 3)
             {
+                ScalarType det = this->determinant();
+                if (abs(det) < FLOAT_EPSILON)
+                    return EmbeddedCoreType::Zero();
+                ScalarType invDet = (ScalarType)1.0 / det;
                 result(0, 0) = (this->Elements[4] * this->Elements[8] - this->Elements[5] * this->Elements[7]) * invDet;
                 result(0, 1) = (this->Elements[6] * this->Elements[5] - this->Elements[3] * this->Elements[8]) * invDet;
                 result(0, 2) = (this->Elements[3] * this->Elements[7] - this->Elements[6] * this->Elements[4]) * invDet;
@@ -605,13 +607,10 @@ namespace EmbeddedTypes
                 result(2, 1) = (this->Elements[2] * this->Elements[3] - this->Elements[0] * this->Elements[5]) * invDet;
                 result(2, 2) = (this->Elements[0] * this->Elements[4] - this->Elements[1] * this->Elements[3]) * invDet;
             }
-            else if constexpr (RowsAtCompileTime == 4 && ColsAtCompileTime == 4)
-            {
-                // TODO : implement
-            }
             else
             {
-                // TODO : implement
+                PartialPivLU<EmbeddedCoreType> lu(*this);
+                result = lu.inverse();
             }
             return result;
         }
