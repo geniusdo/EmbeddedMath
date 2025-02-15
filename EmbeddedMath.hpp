@@ -878,7 +878,6 @@ namespace EmbeddedTypes
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
             this->L = MatrixType::Identity();
-            this->P = MatrixType::Identity();
             this->U = matrix;
             // initialize Q
             for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
@@ -896,6 +895,52 @@ namespace EmbeddedTypes
         MatrixType matrixU()
         {
             return this->U;
+        }
+
+        ScalarType determinant() const
+        {
+            ScalarType det = 1.0;
+            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            {
+                det *= this->L(i, i);
+            }
+            return det;
+        }
+
+        MatrixType inverse()
+        {
+            MatrixType invL = MatrixType::Identity();
+            MatrixType invU;
+            MatrixType result;
+
+            for (int i = 1; i < MatrixType::RowsAtCompileTime; ++i)
+            {
+                for (int j = 0; j < i; ++j)
+                {
+                    for (int k = j + 1; k < i - 1; ++k)
+                        invL(i, j) -= this->L(i, k) * invL(k, j);
+                    invL(i, j) -= this->L(i, j);
+                }
+            }
+
+            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            {
+                invU(i, i) = 1.0 / this->U(i, i);
+                for (int j = i + 1; j < MatrixType::ColsAtCompileTime; ++j)
+                {
+                    for (int k = i + 1; k < j; ++k)
+                        invU(i, j) -= this->U(i, k) * invU(k, j) * invU(i, i);
+                }
+            }
+
+            result = invU * invL;
+
+            // swap rows according to P
+            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            {
+                result.row(i).swap(result.row(Q[i]));
+            }
+            return result;
         }
 
     private:
@@ -921,7 +966,7 @@ namespace EmbeddedTypes
                     Q[k] = Q[pivotIndex];
                     Q[pivotIndex] = tmp;
                 }
-    
+
                 this->L.block(k, k, MatrixType::ColsAtCompileTime - k, 1) = matrix.block(k, k, MatrixType::ColsAtCompileTime - k, 1);
                 ScalarType invPivot = 1.0 / matrix(k, k);
                 for (int i = k + 1; i < MatrixType::ColsAtCompileTime; ++i)
@@ -933,12 +978,12 @@ namespace EmbeddedTypes
                     matrix(k, i) *= invPivot;
                 }
             }
-            
+
             for (int k = 0; k < MatrixType::ColsAtCompileTime; ++k)
             {
-                for (int i = k ; i < MatrixType::RowsAtCompileTime; ++i)
+                for (int i = k; i < MatrixType::RowsAtCompileTime; ++i)
                 {
-                    if(i==k)
+                    if (i == k)
                         matrix(i, k) = 1;
                     else
                         matrix(i, k) = 0;
