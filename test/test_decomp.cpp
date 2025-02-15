@@ -37,28 +37,34 @@ TEST_CASE("test decomposition")
     B(2,1) = 6;
     B(2,2) = 4;
     PartialPivLU<Matrix3f> lu3(B);
-    auto L3 = lu3.matrixL();
-    printf("matrix L3\n");
-    printf("%f %f %f\n", L3(0,0), L3(0,1), L3(0,2));
-    printf("%f %f %f\n", L3(1,0), L3(1,1), L3(1,2));
-    printf("%f %f %f\n", L3(2,0), L3(2,1), L3(2,2));
-
-    auto U3 = lu3.matrixU();
-    printf("matrix U3\n");
-    printf("%f %f %f\n", U3(0,0), U3(0,1), U3(0,2));
-    printf("%f %f %f\n", U3(1,0), U3(1,1), U3(1,2));
-    printf("%f %f %f\n", U3(2,0), U3(2,1), U3(2,2));
-
-    auto result = L3 * U3;
-    printf("result\n");
-    printf("%f %f %f\n", result(0,0), result(0,1), result(0,2));
-    printf("%f %f %f\n", result(1,0), result(1,1), result(1,2));
-    printf("%f %f %f\n", result(2,0), result(2,1), result(2,2));
-
     auto inv = lu3.inverse();
-    printf("inv\n");
+    printf("invB\n");
     printf("%f %f %f\n", inv(0,0), inv(0,1), inv(0,2));
     printf("%f %f %f\n", inv(1,0), inv(1,1), inv(1,2));
     printf("%f %f %f\n", inv(2,0), inv(2,1), inv(2,2));
 
+    Matrix4f C = Matrix4f::Zero();
+    C(0,0) = 1;
+    C(0,1) = 2;
+    C(0,2) = 3;
+    C(0,3) = 4;
+    C(1,0) = 2;
+    C(1,1) = 3;
+    C(1,2) = 2;
+    C(1,3) = 5;
+    C(2,0) = 1;
+    C(2,1) = 2;
+    C(2,2) = 3;
+    C(2,3) = 2;
+    C(3,0) = 1;
+    C(3,1) = -1;
+    C(3,2) = 0;
+    C(3,3) = 2;
+    PartialPivLU<Matrix4f> lu4(C);
+    auto invC = lu4.inverse();
+    printf("invC\n");
+    printf("%f %f %f %f\n", invC(0,0), invC(0,1), invC(0,2), invC(0,3));   
+    printf("%f %f %f %f\n", invC(1,0), invC(1,1), invC(1,2), invC(1,3));
+    printf("%f %f %f %f\n", invC(2,0), invC(2,1), invC(2,2), invC(2,3));
+    printf("%f %f %f %f\n", invC(3,0), invC(3,1), invC(3,2), invC(3,3));
 }
