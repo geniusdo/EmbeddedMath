@@ -663,18 +663,71 @@ namespace EmbeddedTypes
         const EmbeddedCoreType<T, C1_R2, C2> &rhs)
     {
         EmbeddedCoreType<T, R1, C2> result;
-        for (int i = 0; i < R1; ++i)
+        if constexpr (R1 == 1 && C1_R2 == 1 && C2 == 1)
         {
-            for (int j = 0; j < C2; ++j)
+            result(0) = lhs(0) * rhs(0);
+        }
+        else if constexpr (R1 == 2 && C1_R2 == 2 && C2 == 2)
+        {
+            result(0) = lhs(0) * rhs(0) + lhs(2) * rhs(1);
+            result(1) = lhs(1) * rhs(0) + lhs(3) * rhs(1);
+            result(2) = lhs(0) * rhs(2) + lhs(2) * rhs(3);
+            result(3) = lhs(1) * rhs(2) + lhs(3) * rhs(3);
+        }
+        else if constexpr (R1 == 3 && C1_R2 == 3 && C2 == 3)
+        {
+            result(0) = lhs(0) * rhs(0) + lhs(3) * rhs(1) + lhs(6) * rhs(2);
+            result(1) = lhs(1) * rhs(0) + lhs(4) * rhs(1) + lhs(7) * rhs(2);
+            result(2) = lhs(2) * rhs(0) + lhs(5) * rhs(1) + lhs(8) * rhs(2);
+            result(3) = lhs(0) * rhs(3) + lhs(3) * rhs(4) + lhs(6) * rhs(5);
+            result(4) = lhs(1) * rhs(3) + lhs(4) * rhs(4) + lhs(7) * rhs(5);
+            result(5) = lhs(2) * rhs(3) + lhs(5) * rhs(4) + lhs(8) * rhs(5);
+            result(6) = lhs(0) * rhs(6) + lhs(3) * rhs(7) + lhs(6) * rhs(8);
+            result(7) = lhs(1) * rhs(6) + lhs(4) * rhs(7) + lhs(7) * rhs(8);
+            result(8) = lhs(2) * rhs(6) + lhs(5) * rhs(7) + lhs(8) * rhs(8);
+        }
+        else if constexpr (R1 == 4 && C1_R2 == 4 && C2 == 4)
+        {
+            result(0) = lhs(0) * rhs(0) + lhs(4) * rhs(1) + lhs(8) * rhs(2) + lhs(12) * rhs(3);
+            result(1) = lhs(1) * rhs(0) + lhs(5) * rhs(1) + lhs(9) * rhs(2) + lhs(13) * rhs(3);
+            result(2) = lhs(2) * rhs(0) + lhs(6) * rhs(1) + lhs(10) * rhs(2) + lhs(14) * rhs(3);
+            result(3) = lhs(3) * rhs(0) + lhs(7) * rhs(1) + lhs(11) * rhs(2) + lhs(15) * rhs(3);
+            result(4) = lhs(0) * rhs(4) + lhs(4) * rhs(5) + lhs(8) * rhs(6) + lhs(12) * rhs(7);
+            result(5) = lhs(1) * rhs(4) + lhs(5) * rhs(5) + lhs(9) * rhs(6) + lhs(13) * rhs(7);
+            result(6) = lhs(2) * rhs(4) + lhs(6) * rhs(5) + lhs(10) * rhs(6) + lhs(14) * rhs(7);
+            result(7) = lhs(3) * rhs(4) + lhs(7) * rhs(5) + lhs(11) * rhs(6) + lhs(15) * rhs(7);
+            result(8) = lhs(0) * rhs(8) + lhs(4) * rhs(9) + lhs(8) * rhs(10) + lhs(12) * rhs(11);
+            result(9) = lhs(1) * rhs(8) + lhs(5) * rhs(9) + lhs(9) * rhs(10) + lhs(13) * rhs(11);
+            result(10) = lhs(2) * rhs(8) + lhs(6) * rhs(9) + lhs(10) * rhs(10) + lhs(14) * rhs(11);
+            result(11) = lhs(3) * rhs(8) + lhs(7) * rhs(9) + lhs(11) * rhs(10) + lhs(15) * rhs(11);
+            result(12) = lhs(0) * rhs(12) + lhs(4) * rhs(13) + lhs(8) * rhs(14) + lhs(12) * rhs(15);
+            result(13) = lhs(1) * rhs(12) + lhs(5) * rhs(13) + lhs(9) * rhs(14) + lhs(13) * rhs(15);
+            result(14) = lhs(2) * rhs(12) + lhs(6) * rhs(13) + lhs(10) * rhs(14) + lhs(14) * rhs(15);
+            result(15) = lhs(3) * rhs(12) + lhs(7) * rhs(13) + lhs(11) * rhs(14) + lhs(15) * rhs(15);
+        }
+        else
+        {
+            T sum;
+            for (int i = 0; i < R1; ++i)
             {
-                for (int k = 0; k < C1_R2; ++k)
+                for (int j = 0; j < C2; ++j)
                 {
-                    result(i, j) += lhs(i, k) * rhs(k, j);
+                    sum = 0;
+                    int k = 0;
+                    for (; k < C1_R2 - 1; k += 2)
+                    {
+                        sum += lhs(i, k) * rhs(k, j);
+                        sum += lhs(i, k + 1) * rhs(k + 1, j);
+                    }
+                    if constexpr ((C1_R2 % 2) == 1)
+                        sum += lhs(i, k) * rhs(k, j);
+                    result(i, j) = sum;
                 }
             }
         }
         return result;
     }
+
     // Partial Specialize Quaternion
     template <typename ScalarType>
     class EmbeddedQuaternion : public EmbeddedCoreType<ScalarType, 4, 1>
@@ -877,7 +930,7 @@ namespace EmbeddedTypes
         {
             //! currently only support square matrix
             static_assert(MatrixType::RowsAtCompileTime == MatrixType::ColsAtCompileTime, "only support square matrix");
-            this->L = MatrixType::Identity();
+            this->L;
             this->U = matrix;
             // initialize Q
             for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
@@ -910,7 +963,7 @@ namespace EmbeddedTypes
         MatrixType inverse()
         {
             MatrixType invL;
-            MatrixType invU = MatrixType::Identity();
+            MatrixType invU;
             MatrixType result;
 
             invL(0) = 1.0 / this->L(0);
@@ -926,6 +979,7 @@ namespace EmbeddedTypes
 
             for (int i = MatrixType::RowsAtCompileTime - 1; i >= 0; --i)
             {
+                invU(i, i) = 1.0;
                 for (int j = i + 1; j < MatrixType::ColsAtCompileTime; ++j)
                 {
                     for (int k = i + 1; k < j; ++k)
@@ -937,7 +991,7 @@ namespace EmbeddedTypes
             result = invU * invL;
 
             // swap rows according to P
-            for (int i = MatrixType::RowsAtCompileTime - 1; i >= 0; --i)
+            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
             {
                 if (Q[i] != i)
                     result.row(i).swap(result.row(Q[i]));
@@ -966,6 +1020,7 @@ namespace EmbeddedTypes
                     Q[k] = Q[pivotIndex];
                 }
 
+                this->L(k, k) = 1.0;
                 this->L.block(k, k, MatrixType::ColsAtCompileTime - k, 1) = matrix.block(k, k, MatrixType::ColsAtCompileTime - k, 1);
                 ScalarType invPivot = 1.0 / matrix(k, k);
                 for (int i = k + 1; i < MatrixType::ColsAtCompileTime; ++i)
