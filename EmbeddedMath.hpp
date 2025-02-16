@@ -718,8 +718,10 @@ namespace EmbeddedTypes
             {
                 for (int j = 0; j < C2; ++j)
                 {
+
                     sum = 0;
                     int k = 0;
+                    __builtin_prefetch(&rhs(k, j), 1, 0);
                     for (; k < C1_R2 - 1; k += 2)
                     {
                         sum += lhs(i, k) * rhs(k, j);
