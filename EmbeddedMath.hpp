@@ -718,17 +718,16 @@ namespace EmbeddedTypes
             {
                 for (int j = 0; j < C2; ++j)
                 {
-
+                    __builtin_prefetch(&rhs(i, j), 0, 0);
                     sum = 0;
-                    int k = 0;
-                    __builtin_prefetch(&rhs(k, j), 0, 0);
-                    for (; k < C1_R2 - 1; k += 2)
+                    for (int k = 0; k < C1_R2 - 1; k += 2)
                     {
+
                         sum += lhs(i, k) * rhs(k, j);
                         sum += lhs(i, k + 1) * rhs(k + 1, j);
                     }
                     if constexpr ((C1_R2 % 2) == 1)
-                        sum += lhs(i, k) * rhs(k, j);
+                        sum += lhs(i, C1_R2 - 1) * rhs(C1_R2 - 1, j);
                     result(i, j) = sum;
                 }
             }
