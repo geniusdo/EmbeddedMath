@@ -999,7 +999,7 @@ namespace EmbeddedTypes
             result = invU * invL;
 
             // swap rows according to P
-            for (int i = 0; i < MatrixType::RowsAtCompileTime; ++i)
+            for (int i = MatrixType::RowsAtCompileTime - 1; i >= 0; --i)
             {
                 if (Q[i] != i)
                     result.row(i).swap(result.row(Q[i]));

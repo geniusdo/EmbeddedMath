@@ -25,6 +25,18 @@ bool isApprox(Eigen::Matrix<T, rows, cols> const &lhs, EmbeddedMath::Matrix<T, r
     return isEqual;
 }
 
+template<class Mat>
+void printMat(const Mat& m)
+{
+    for(int i=0;i<Mat::RowsAtCompileTime*Mat::ColsAtCompileTime;i++)
+    {
+        printf("%f ",m(i));
+        if(i%Mat::RowsAtCompileTime==Mat::RowsAtCompileTime-1)
+            printf("\n");
+    }
+    return;
+}
+
 TEST_CASE("Test with Eigen")
 {
     Eigen::Vector3d eigen_v1(1, 2, 3);
@@ -119,5 +131,23 @@ TEST_CASE("Test with Eigen")
     auto eigen_euler = eigen_q3.toRotationMatrix().eulerAngles(2, 1, 0);
     auto embedded_euler = embedded_q3.toRotationMatrix().eulerAngles(2, 1, 0);
     CHECK(isApprox(eigen_euler, embedded_euler));
+
+    unsigned int seed = 12; 
+    std::srand(seed);
+    Eigen::Matrix4d testInvMat = Eigen::Matrix4d::Random();
+    EmbeddedMath::Matrix4d embInvMat;
+    for(int i=0;i<16;i++)
+    {
+        embInvMat(i) = testInvMat(i);
+    }
+    Eigen::Matrix4d eigenInvMat = testInvMat.inverse();
+    printf("origin matt\n");
+    printMat(testInvMat);
+    printf("eigen inv\n");
+    printMat(eigenInvMat);
+    EmbeddedMath::Matrix4d embeddedInvMat = embInvMat.inverse();
+    printf("embedded inv\n");
+    printMat(embeddedInvMat);
+    CHECK(isApprox(eigenInvMat, embeddedInvMat));
 }
 
